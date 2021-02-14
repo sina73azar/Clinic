@@ -1,6 +1,7 @@
 package com.sina.clinic
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.sina.clinic.databinding.ActivityMainBinding
 import net.time4j.PlainDate
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedCalendar: PersianCalendar
     private lateinit var listCurrentPersianCalendar:List<PersianCalendar>
     private var todayPersianCalendar:PersianCalendar?=null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -28,11 +30,18 @@ class MainActivity : AppCompatActivity() {
 
         todayPersianCalendar?.apply {
             selectedCalendar=this
-            binding.tvMonth.text= this.month.getDisplayName(Locale("fa")) + this.year
+            binding.tvMonth.text=this.month.getDisplayName(Locale("fa")).plus(this.year)
             monthBuilder(this.year, this.month)
         }
-        adapter=CalAdapter(listCurrentPersianCalendar)
+        val listener:((PersianCalendar)->Unit)={persianCalendar ->
+            selectedCalendar=persianCalendar
+            adapter.selectedCal=selectedCalendar
+            adapter.notifyDataSetChanged()
+        }
+        adapter=CalAdapter(listCurrentPersianCalendar,listener,selectedCalendar)
         binding.rvPersianCal.adapter = adapter
+        //set scroll position to today
+        binding.rvPersianCal.scrollToPosition(selectedCalendar.dayOfMonth-2)
 
         binding.viewNextMonth.setOnClickListener {
             val newYear=computeNextYear(selectedCalendar)
@@ -90,8 +99,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun changeMonth() {
-        selectedCalendar?.apply {
-            binding.tvMonth.text= this.month.getDisplayName(Locale("fa")) + this.year
+        selectedCalendar.apply {
+            binding.tvMonth.text=this.month.getDisplayName(Locale("fa")).plus(this.year)
+
         }
     }
     private fun getRightNow() {

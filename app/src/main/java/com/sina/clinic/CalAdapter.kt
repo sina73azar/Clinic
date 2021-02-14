@@ -7,7 +7,10 @@ import com.sina.clinic.databinding.CalendarItemBinding
 import net.time4j.calendar.PersianCalendar
 import java.util.*
 
-class CalAdapter(private var persianDates: List<PersianCalendar>) : RecyclerView.Adapter<CalAdapter.CalViewHolder>() {
+class CalAdapter(private var persianDates: List<PersianCalendar>,
+                 val listener:( PersianCalendar)->Unit,
+                 var selectedCal:PersianCalendar)
+    : RecyclerView.Adapter<CalAdapter.CalViewHolder>() {
     lateinit var binding: CalendarItemBinding
     class CalViewHolder(val binding: CalendarItemBinding):RecyclerView.ViewHolder(binding.root)
 
@@ -18,9 +21,19 @@ class CalAdapter(private var persianDates: List<PersianCalendar>) : RecyclerView
 
     override fun onBindViewHolder(holder: CalViewHolder, position: Int) {
         val curCal=persianDates[position]
+
         holder.binding.apply {
             tvDayCalItem.text=curCal.dayOfMonth.toString()
-            tvMonthCalItem.text=curCal.dayOfWeek.getDisplayName(Locale("fa"))
+            tvMonthCalItem.text = curCal.dayOfWeek.getDisplayName(Locale("fa"))
+            linearBackCalItem.setOnClickListener{
+                listener(curCal)
+            }
+        }
+        //highlight chosen one default is today
+        if (position + 1 == selectedCal.dayOfMonth) {
+            holder.binding.linearBackCalItem.setBackgroundResource(R.color.green)
+        }else{
+            holder.binding.linearBackCalItem.setBackgroundResource(R.color.green_700)
         }
     }
 
@@ -30,4 +43,5 @@ class CalAdapter(private var persianDates: List<PersianCalendar>) : RecyclerView
     fun setListMonth(newList:List<PersianCalendar>){
         this.persianDates=newList
     }
+
 }
