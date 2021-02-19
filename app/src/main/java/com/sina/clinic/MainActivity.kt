@@ -1,7 +1,7 @@
 package com.sina.clinic
 
 import android.os.Bundle
-import android.view.View
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.sina.clinic.databinding.ActivityMainBinding
 import net.time4j.PlainDate
@@ -112,17 +112,29 @@ class MainActivity : AppCompatActivity() {
     }
     private fun monthBuilder(year: Int, month: PersianMonth?) {
         month?.value?.let {
-            val tempList= mutableListOf<PersianCalendar>()
-            for (i in 1..getLengthPersianMonth(it)) {
+            val tempList = mutableListOf<PersianCalendar>()
+            val monthLength=getLengthPersianMonth(it,isYearKabise(year))
+            for (i in 1..monthLength) {
                 tempList.add(PersianCalendar.of(year, month, i))
             }
-            listCurrentPersianCalendar=tempList
+            listCurrentPersianCalendar = tempList
         }
     }
-    private fun getLengthPersianMonth(monthNumber:Int):Int{
-        return when (monthNumber) {
-            in 1..6 -> 31
-            12 -> 29
+
+    private fun isYearKabise(year: Int):Boolean {
+        //CHECK ARITHMETIC SEQUENCE FROM 8 YEAR AGO TO 100 YEARS LATER IF NEEDED...NOTE THAT WE ARE USING THE CLUE WHICH THIS YEAR(1399) IS KABISE
+        for (i in -8..100 step 4) {
+            if (1399 + i == year) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun getLengthPersianMonth(monthNumber:Int,isKabise:Boolean):Int{
+        return when {
+            monthNumber in 1..6 -> 31
+            monthNumber == 12 && !isKabise -> 29
             else -> 30
         }
     }
